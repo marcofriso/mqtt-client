@@ -1,70 +1,29 @@
-# mqtt-client-React
+# MQTT client
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## Note
 
-In the project directory, you can run:
+Use NPM 14.15.1 or similar
 
-### `yarn start`
+## Run
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- `npm start
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## Funtionality
 
-### `yarn test`
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Input as in the image and change the ClientID to something unique; username/password are not necessary for the public folder
+2. Use ‘Connect’ to link to the server à it should change to “Connected”
+3. Use ‘Subscribe’ to subscribe to a topic (example topic provided but do as you
+wish)
+4. Enter text payload and press ‘Publish’ – it will go to the MQTT server and appear
+back to the subscribed topic listeners. If you have subscribed to the same topic
+you should see the message appear in ‘Receiver’
+5. The messages shown on this tab are messages sent to the topic you have
+subscribed above.
 
-### `yarn build`
+## Extra
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The application should track the users already online and flag the ones that have left/disconnected. This can be done by periodically broadcasting a message to a ‘users’ queue and the apps should track the user broadcasts, and if one has not been received by a user in a predefined amount of time, the user should be marked offline.
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
