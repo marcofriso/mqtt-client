@@ -1,7 +1,7 @@
 @import '~antd/dist/antd.css';
 
 .App {
-  background-color: #282c34;
+  background-color: lightgray;
   min-height: 100vh;
   padding: 40px;
   display: flex;
