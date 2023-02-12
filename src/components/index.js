@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState, useCallback } from "react";
 import Connection from "./Connection";
 import Publisher from "./Publisher";
 import Subscriber from "./Subscriber";
@@ -26,6 +26,7 @@ const HookMqtt = () => {
   const [isSubed, setIsSub] = useState(false);
   const [payload, setPayload] = useState({});
   const [connectStatus, setConnectStatus] = useState("Disconnected");
+  const [username, setUsername] = useState("");
 
   const mqttConnect = (host, mqttOption) => {
     setConnectStatus("Connecting");
@@ -46,12 +47,6 @@ const HookMqtt = () => {
       });
       client.on("message", (topic, message, packet) => {
         const payload = { topic, message: message.toString() };
-        console.log(
-          "RUNS",
-          JSON.parse(message.toString()),
-          "\nMessage",
-          message.toString()
-        );
         setPayload(payload);
       });
     }
@@ -67,9 +62,10 @@ const HookMqtt = () => {
 
   const mqttPublish = (context) => {
     if (client) {
-      const { topic, qos, payload } = context;
+      const { topic, payload } = context;
+
       const payload2 = JSON.stringify({ message: payload, userId: "XXXY" });
-      client.publish(topic, payload2, { qos }, (error) => {
+      client.publish(topic, payload2, { qos: 1 }, (error) => {
         if (error) {
           console.log("Publish error: ", error);
         }
@@ -77,23 +73,36 @@ const HookMqtt = () => {
     }
   };
 
-  const mqttSub = (subscription) => {
-    if (client) {
-      const { topic, qos } = subscription;
-      client.subscribe(topic, { qos }, (error) => {
-        if (error) {
-          console.log("Subscribe to topics error", error);
-          return;
-        }
-        console.log("SUBSCRIBED", subscription);
-        setIsSub(true);
+  const mqttSub = useCallback(
+    (subscription) => {
+      if (client) {
+        const { topic, qos } = subscription;
+        client.subscribe(topic, { qos: 1 }, (error) => {
+          if (error) {
+            console.log("Subscribe to topics error", error);
+            return;
+          }
+          console.log("SUBSCRIBED", subscription);
 
-        if (!error) {
-          client.publish("testtopic/react", JSON.stringify(`Test MODICA`));
-        }
-      });
+          setIsSub(true);
+
+          if (!error) {
+            client.publish("testtopic/react", JSON.stringify(`Test MODICA`));
+          }
+        });
+      }
+    },
+    [client]
+  );
+
+  useEffect(() => {
+    if (connectStatus === "Connected") {
+      console.log("RUN", username);
+      mqttSub({ topic: "presence" });
+      mqttSub({ topic: "public" });
+      mqttSub({ topic: username });
     }
-  };
+  }, [username, connectStatus, mqttSub]);
 
   const mqttUnSub = (subscription) => {
     if (client) {
@@ -114,12 +123,15 @@ const HookMqtt = () => {
       <Connection
         connect={mqttConnect}
         disconnect={mqttDisconnect}
-        connectBtn={connectStatus}
+        connectionStatus={connectStatus}
+        setUsername={setUsername}
+        connectedUser={username}
       />
       <QosOption.Provider value={qosOption}>
         <Subscriber sub={mqttSub} unSub={mqttUnSub} showUnsub={isSubed} />
         <Publisher publish={mqttPublish} />
       </QosOption.Provider>
+      {console.log("MESSAGE PAYLOAD", payload)}
       <Receiver payload={payload} />
     </>
   );

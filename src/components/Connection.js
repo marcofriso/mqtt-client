@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, Form, Input, Row, Col } from "antd";
 
-const Connection = ({ connect, disconnect, connectBtn }) => {
+const Connection = ({
+  connect,
+  disconnect,
+  connectionStatus,
+  setUsername,
+  connectedUser,
+}) => {
   const [form] = Form.useForm();
   const [detailsDisplayProperty, setDetailsDisplayProperty] = useState("none");
   const [formFieldsDisabled, setFormFieldsDisabled] = useState("");
@@ -37,10 +43,10 @@ const Connection = ({ connect, disconnect, connectBtn }) => {
   };
 
   useEffect(() => {
-    connectBtn === "Connected"
+    connectionStatus === "Connected"
       ? setFormFieldsDisabled("disabled")
       : setFormFieldsDisabled("");
-  }, [connectBtn]);
+  }, [connectionStatus]);
 
   const onFinish = (values) => {
     const { host, clientId, port, username, password } = values;
@@ -50,6 +56,7 @@ const Connection = ({ connect, disconnect, connectBtn }) => {
     options.password = password;
 
     connect(url, options);
+    setUsername(username);
   };
 
   const handleConnect = () => {
@@ -57,6 +64,7 @@ const Connection = ({ connect, disconnect, connectBtn }) => {
   };
 
   const handleDisconnect = () => {
+    setUsername("");
     disconnect();
   };
 
@@ -92,7 +100,9 @@ const Connection = ({ connect, disconnect, connectBtn }) => {
   );
 
   return (
-    <Card title={`Connection: ${connectBtn}`}>
+    <Card title="Connection">
+      <p>Connection status: {connectionStatus}</p>
+      <p>Connected user: {connectedUser.length ? connectedUser : "N/A"}</p>
       <Form
         layout="vertical"
         name="basic"
@@ -107,7 +117,7 @@ const Connection = ({ connect, disconnect, connectBtn }) => {
             </Form.Item>
           </Col>
           <Col span={6} style={buttonsStyle}>
-            {connectBtn === "Connected" ? (
+            {connectionStatus === "Connected" ? (
               <Button block danger onClick={handleDisconnect}>
                 Disconnect
               </Button>
