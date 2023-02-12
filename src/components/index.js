@@ -27,6 +27,7 @@ const HookMqtt = () => {
   const [payload, setPayload] = useState({});
   const [connectStatus, setConnectStatus] = useState("Disconnected");
   const [username, setUsername] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState("public");
 
   const mqttConnect = (host, mqttOption) => {
     setConnectStatus("Connecting");
@@ -47,6 +48,7 @@ const HookMqtt = () => {
       });
       client.on("message", (topic, message, packet) => {
         const payload = { topic, message: message.toString() };
+
         setPayload(payload);
       });
     }
@@ -60,12 +62,9 @@ const HookMqtt = () => {
     }
   };
 
-  const mqttPublish = (context) => {
+  const mqttPublish = ({ topic, payload }) => {
     if (client) {
-      const { topic, payload } = context;
-
-      const payload2 = JSON.stringify({ message: payload, userId: "XXXY" });
-      client.publish(topic, payload2, { qos: 1 }, (error) => {
+      client.publish(topic, payload, { qos: 1 }, (error) => {
         if (error) {
           console.log("Publish error: ", error);
         }
@@ -76,13 +75,13 @@ const HookMqtt = () => {
   const mqttSub = useCallback(
     (subscription) => {
       if (client) {
-        const { topic, qos } = subscription;
+        const { topic } = subscription;
         client.subscribe(topic, { qos: 1 }, (error) => {
           if (error) {
             console.log("Subscribe to topics error", error);
             return;
           }
-          console.log("SUBSCRIBED", subscription);
+          // console.log("SUBSCRIBED", subscription);
 
           setIsSub(true);
 
@@ -104,19 +103,19 @@ const HookMqtt = () => {
     }
   }, [username, connectStatus, mqttSub]);
 
-  const mqttUnSub = (subscription) => {
-    if (client) {
-      const { topic } = subscription;
-      client.unsubscribe(topic, (error) => {
-        if (error) {
-          console.log("Unsubscribe error", error);
-          return;
-        }
+  // const mqttUnSub = (subscription) => {
+  //   if (client) {
+  //     const { topic } = subscription;
+  //     client.unsubscribe(topic, (error) => {
+  //       if (error) {
+  //         console.log("Unsubscribe error", error);
+  //         return;
+  //       }
 
-        setIsSub(false);
-      });
-    }
-  };
+  //       setIsSub(false);
+  //     });
+  //   }
+  // };
 
   return (
     <>
@@ -128,10 +127,14 @@ const HookMqtt = () => {
         connectedUser={username}
       />
       <QosOption.Provider value={qosOption}>
-        <Subscriber sub={mqttSub} unSub={mqttUnSub} showUnsub={isSubed} />
-        <Publisher publish={mqttPublish} />
+        {/* <Subscriber sub={mqttSub} unSub={mqttUnSub} showUnsub={isSubed} /> */}
+        <Publisher
+          publish={mqttPublish}
+          selectedTopic={selectedTopic}
+          username={username}
+        />
       </QosOption.Provider>
-      {console.log("MESSAGE PAYLOAD", payload)}
+      {/* {console.log("MESSAGE PAYLOAD", payload)} */}
       <Receiver payload={payload} />
     </>
   );

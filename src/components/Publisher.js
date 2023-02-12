@@ -1,19 +1,30 @@
-import React, { useContext } from 'react';
-import { Card, Form, Input, Row, Col, Button, Select } from 'antd';
-import { QosOption } from './index'
+import React from "react";
+import { Card, Form, Input, Row, Col, Button } from "antd";
 
-const Publisher = ({ publish }) => {
+const Publisher = ({ publish, selectedTopic, username }) => {
   const [form] = Form.useForm();
-  const qosOptions = useContext(QosOption);
 
   const record = {
-    topic: 'testtopic/react',
-    qos: 0,
+    messageText: "",
   };
 
-  const onFinish = (values) => {
-    publish(values)
+  const onFinish = ({ messageText }) => {
+    const publishedValues = {
+      topic: selectedTopic,
+      payload: JSON.stringify({
+        datetime: new Date(),
+        messageText,
+        username,
+      }),
+    };
+
+    // console.log("PUB-VALS ", publishedValues);
+
+    publish(publishedValues);
+    form.resetFields();
   };
+
+  const displayedTopic = selectedTopic === "public" ? "All" : selectedTopic;
 
   const PublishForm = (
     <Form
@@ -24,48 +35,23 @@ const Publisher = ({ publish }) => {
       onFinish={onFinish}
     >
       <Row gutter={20}>
-        <Col span={12}>
-          <Form.Item
-            label="Topic"
-            name="topic"
-          >
-            <Input />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            label="QoS"
-            name="qos"
-          >
-            <Select options={qosOptions} />
-          </Form.Item>
-        </Col>
         <Col span={24}>
-          <Form.Item
-            label="Payload"
-            name="payload"
-          >
+          <Form.Item label="Message" name="messageText">
             <Input.TextArea />
           </Form.Item>
         </Col>
-        <Col span={8} offset={16} style={{ textAlign: 'right' }}>
+        <Col span={24} style={{ textAlign: "center" }}>
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Publish
+              Send to {displayedTopic}
             </Button>
           </Form.Item>
         </Col>
       </Row>
     </Form>
-  )
-
-  return (
-    <Card
-      title="Publisher"
-    >
-      {PublishForm}
-    </Card>
   );
-}
+
+  return <Card title="Publisher">{PublishForm}</Card>;
+};
 
 export default Publisher;

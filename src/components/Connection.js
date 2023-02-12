@@ -101,8 +101,12 @@ const Connection = ({
 
   return (
     <Card title="Connection">
-      <p>Connection status: {connectionStatus}</p>
-      <p>Connected user: {connectedUser.length ? connectedUser : "N/A"}</p>
+      <p style={{ marginBottom: "8px" }}>
+        Connection status: {connectionStatus}
+      </p>
+      <p style={{ marginBottom: "20px" }}>
+        Connected user: {connectedUser.length ? connectedUser : "N/A"}
+      </p>
       <Form
         layout="vertical"
         name="basic"
