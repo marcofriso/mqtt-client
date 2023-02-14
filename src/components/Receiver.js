@@ -127,7 +127,6 @@ const Receiver = ({
   };
 
   const renderUserListItem = (item) => {
-    console.log("CONN-LIST", connectedUserList);
     let isDisabled =
       ![...connectedUserList].includes(item) || connected !== "Connected";
 
@@ -135,11 +134,12 @@ const Receiver = ({
 
     return (
       <List.Item>
-        <i
-          style={{ visibility: isDisabled ? "visible" : "hidden" }}
-          className={"fa fa-ban"}
-        />
         <Button disabled={isDisabled} onClick={() => setTopic(selectTopic)}>
+          {isDisabled && (
+            <span style={{ marginRight: "5px" }}>
+              <i className={"fa fa-ban"} />
+            </span>
+          )}
           {item}
         </Button>
       </List.Item>
