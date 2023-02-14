@@ -1,8 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { Card, List, Row, Col } from "antd";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { Card, List, Row, Col, Button } from "antd";
 
-const Receiver = ({ payload }) => {
+const Receiver = ({
+  payload,
+  availabilityCheckInterval,
+  isPresenceSubed,
+  connected,
+  username,
+}) => {
   const [messages, setMessages] = useState([]);
+  //const [userList, setUserList] = useState(() => new Set(["--all--"]));
+  const [connectedUserList, setConnectedUserList] = useState(() => new Set([]));
+
+  useEffect(() => console.log("RELOAD"), []);
+
+  let userList = useRef(["--all--"]);
+
+  let presenceMessages = useRef([]);
+
   const maxMessagesListLength = 1000;
 
   const isJson = (str) => {
@@ -15,25 +30,82 @@ const Receiver = ({ payload }) => {
   };
 
   const isValidMessage =
-    payload.topic &&
+    payload?.topic !== "presence" &&
     isJson(payload.message) &&
-    JSON.parse(payload.message).username.length;
+    JSON.parse(payload.message).username?.length;
+
+  const isValidPresenceMessage =
+    payload?.topic === "presence" &&
+    isJson(payload.message) &&
+    JSON.parse(payload.message).username?.length;
 
   useEffect(() => {
     if (isValidMessage) {
       const { messageText, username, datetime } = JSON.parse(payload.message);
+
       const dt = new Date(datetime);
       const displayedMessage = `${dt.getHours()}:${dt.getMinutes()} [${username}] : ${messageText}`;
+
       const updatedMessages = [...messages, displayedMessage];
 
       if (updatedMessages.length > maxMessagesListLength)
         updatedMessages.shift();
 
       setMessages(updatedMessages);
-      // console.log(messages);
+      console.log("MESSAGES ", messages);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload, isValidMessage]);
+
+  const setUsers = useCallback(() => {
+    if (presenceMessages.current.length) {
+      const time = new Date().getTime();
+
+      const filterRecentMessages = presenceMessages.current.filter(
+        (message) => {
+          const messageTime = new Date(message.datetime).getTime();
+
+          return time - messageTime < availabilityCheckInterval * 1.5;
+        }
+      );
+
+      const connectedUsers = filterRecentMessages
+        .filter((message) => message.username !== username)
+        .map((message) => message.username);
+
+      console.log("USERNAME", username);
+
+      setConnectedUserList(new Set([...connectedUsers, "--all--"].sort()));
+
+      userList.current = new Set(
+        [...[...userList.current, ...connectedUsers]].sort()
+      );
+
+      presenceMessages.current = filterRecentMessages;
+    }
+  }, [availabilityCheckInterval, username]);
+
+  useEffect(() => {
+    if (isValidPresenceMessage) {
+      const { username, datetime } = JSON.parse(payload.message);
+
+      const updatedMessages = [
+        ...presenceMessages.current,
+        { username, datetime },
+      ];
+
+      presenceMessages.current = updatedMessages;
+
+      if (isPresenceSubed) setUsers();
+    }
+  }, [
+    payload,
+    isValidPresenceMessage,
+    presenceMessages,
+    setUsers,
+    isPresenceSubed,
+  ]);
 
   const renderListItem = (item) => (
     <List.Item>
@@ -41,8 +113,19 @@ const Receiver = ({ payload }) => {
     </List.Item>
   );
 
+  const renderUserListItem = (item) => {
+    console.log("CONN-LIST", connectedUserList);
+    const isDisabled = ![...connectedUserList].includes(item);
+
+    return (
+      <List.Item>
+        <Button disabled={isDisabled}>{item}</Button>
+      </List.Item>
+    );
+  };
+
   return (
-    <Card title="Receiver" style={{ minHeight: "280px" }}>
+    <Card title="Receiver">
       <Row gutter={20}>
         <Col span={18}>
           <p>Messages</p>
@@ -52,19 +135,21 @@ const Receiver = ({ payload }) => {
             dataSource={messages}
             renderItem={renderListItem}
             style={{
+              minHeight: "170px",
               maxHeight: "2000px",
               overflow: "auto",
             }}
           />
         </Col>
         <Col span={6}>
-          <p>Active Users</p>
+          <p>Users</p>
           <List
             size="small"
             bordered
-            dataSource={messages}
-            renderItem={renderListItem}
+            dataSource={userList.current}
+            renderItem={renderUserListItem}
             style={{
+              minHeight: "170px",
               maxHeight: "2000px",
               overflow: "auto",
             }}

@@ -64,7 +64,6 @@ const Connection = ({
   };
 
   const handleDisconnect = () => {
-    setUsername("");
     disconnect();
   };
 
