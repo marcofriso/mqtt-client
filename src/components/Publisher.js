@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Form, Input, Row, Col, Button } from "antd";
 
-const Publisher = ({ publish, selectedTopic, username }) => {
+const Publisher = ({ publish, topic, username }) => {
   const [form] = Form.useForm();
 
   const record = {
@@ -10,7 +10,7 @@ const Publisher = ({ publish, selectedTopic, username }) => {
 
   const onFinish = ({ messageText }) => {
     const publishedValues = {
-      topic: selectedTopic,
+      topic,
       payload: JSON.stringify({
         datetime: new Date(),
         messageText,
@@ -24,7 +24,7 @@ const Publisher = ({ publish, selectedTopic, username }) => {
     form.resetFields();
   };
 
-  const displayedTopic = selectedTopic === "public" ? "All" : selectedTopic;
+  const displayedTopic = topic === "public" ? "All" : topic;
 
   const PublishForm = (
     <Form

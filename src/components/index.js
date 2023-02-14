@@ -28,7 +28,7 @@ const HookMqtt = () => {
   const [payload, setPayload] = useState({});
   const [connectStatus, setConnectStatus] = useState("Disconnected");
   const [username, setUsername] = useState("");
-  const [selectedTopic, setSelectedTopic] = useState("public");
+  const [topic, setTopic] = useState("public");
 
   const mqttConnect = (host, mqttOption) => {
     setConnectStatus("Connecting");
@@ -144,11 +144,7 @@ const HookMqtt = () => {
         connectedUser={username}
       />
       <QosOption.Provider value={qosOption}>
-        <Publisher
-          publish={mqttPublish}
-          selectedTopic={selectedTopic}
-          username={username}
-        />
+        <Publisher publish={mqttPublish} topic={topic} username={username} />
       </QosOption.Provider>
       <Receiver
         payload={payload}
@@ -156,6 +152,8 @@ const HookMqtt = () => {
         isPresenceSubed={isPresenceSubed}
         username={username}
         connected={connectStatus}
+        topic={topic}
+        setTopic={setTopic}
       />
     </>
   );

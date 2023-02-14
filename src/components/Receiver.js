@@ -7,9 +7,10 @@ const Receiver = ({
   isPresenceSubed,
   connected,
   username,
+  setTopic,
+  topic,
 }) => {
   const [messages, setMessages] = useState([]);
-  //const [userList, setUserList] = useState(() => new Set(["--all--"]));
   const [connectedUserList, setConnectedUserList] = useState(() => new Set([]));
 
   useEffect(() => console.log("RELOAD"), []);
@@ -41,12 +42,7 @@ const Receiver = ({
 
   useEffect(() => {
     if (isValidMessage) {
-      const { messageText, username, datetime } = JSON.parse(payload.message);
-
-      const dt = new Date(datetime);
-      const displayedMessage = `${dt.getHours()}:${dt.getMinutes()} [${username}] : ${messageText}`;
-
-      const updatedMessages = [...messages, displayedMessage];
+      const updatedMessages = [...messages, payload];
 
       if (updatedMessages.length > maxMessagesListLength)
         updatedMessages.shift();
@@ -73,8 +69,6 @@ const Receiver = ({
       const connectedUsers = filterRecentMessages
         .filter((message) => message.username !== username)
         .map((message) => message.username);
-
-      console.log("USERNAME", username);
 
       setConnectedUserList(new Set([...connectedUsers, "--all--"].sort()));
 
@@ -107,16 +101,31 @@ const Receiver = ({
     isPresenceSubed,
   ]);
 
-  const renderListItem = (item) => (
-    <List.Item>
-      <List.Item.Meta title={item} />
-    </List.Item>
-  );
+  const renderListItem = (item) => {
+    const { messageText, username, datetime } = JSON.parse(item.message);
+    const isPrivate = item.topic !== "public";
+
+    const dt = new Date(datetime);
+    const messageIntro = `${dt.getHours()}:${dt.getMinutes()} [${username}]`;
+
+    return (
+      <List.Item>
+        {messageIntro}:{" "}
+        <i
+          style={{ visibility: isPrivate ? "visible" : "hidden" }}
+          className={"fa fa-lock"}
+        />{" "}
+        {messageText}
+      </List.Item>
+    );
+  };
 
   const renderUserListItem = (item) => {
     console.log("CONN-LIST", connectedUserList);
     let isDisabled =
       ![...connectedUserList].includes(item) || connected !== "Connected";
+
+    const selectTopic = item === "--all--" ? "public" : item;
 
     return (
       <List.Item>
@@ -124,7 +133,9 @@ const Receiver = ({
           style={{ visibility: isDisabled ? "visible" : "hidden" }}
           className={"fa fa-ban"}
         />
-        <Button disabled={isDisabled}>{item}</Button>
+        <Button disabled={isDisabled} onClick={() => setTopic(selectTopic)}>
+          {item}
+        </Button>
       </List.Item>
     );
   };
