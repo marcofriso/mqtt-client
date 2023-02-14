@@ -155,7 +155,7 @@ const HookMqtt = () => {
         availabilityCheckInterval={availabilityCheckInterval}
         isPresenceSubed={isPresenceSubed}
         username={username}
-        connected={connectStatus === "Connected"}
+        connected={connectStatus}
       />
     </>
   );
