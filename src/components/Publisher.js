@@ -18,8 +18,6 @@ const Publisher = ({ publish, topic, username }) => {
       }),
     };
 
-    // console.log("PUB-VALS ", publishedValues);
-
     publish(publishedValues);
     form.resetFields();
   };

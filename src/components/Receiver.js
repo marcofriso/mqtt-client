@@ -13,8 +13,6 @@ const Receiver = ({
   const [messages, setMessages] = useState([]);
   const [connectedUserList, setConnectedUserList] = useState(() => new Set([]));
 
-  useEffect(() => console.log("RELOAD"), []);
-
   let userList = useRef(["--all--"]);
 
   let presenceMessages = useRef([]);

@@ -7,21 +7,6 @@ import mqtt from "mqtt";
 export const QosOption = createContext([]);
 const availabilityCheckInterval = 5000;
 
-const qosOption = [
-  {
-    label: "0",
-    value: 0,
-  },
-  {
-    label: "1",
-    value: 1,
-  },
-  {
-    label: "2",
-    value: 2,
-  },
-];
-
 const HookMqtt = () => {
   const [client, setClient] = useState(null);
   const [isPresenceSubed, setPresenceIsSub] = useState(false);
@@ -116,9 +101,8 @@ const HookMqtt = () => {
       client.on("reconnect", () => {
         setConnectStatus("Reconnecting");
       });
-      client.on("message", (topic, message, packet) => {
+      client.on("message", (topic, message) => {
         const payload = { topic, message: message.toString() };
-        // console.log("Message", payload);
 
         setPayload(payload);
       });
@@ -143,9 +127,7 @@ const HookMqtt = () => {
         setUsername={setUsername}
         connectedUser={username}
       />
-      <QosOption.Provider value={qosOption}>
-        <Publisher publish={mqttPublish} topic={topic} username={username} />
-      </QosOption.Provider>
+      <Publisher publish={mqttPublish} topic={topic} username={username} />
       <Receiver
         payload={payload}
         availabilityCheckInterval={availabilityCheckInterval}
