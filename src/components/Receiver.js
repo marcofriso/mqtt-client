@@ -92,13 +92,19 @@ const Receiver = ({
       presenceMessages.current = updatedMessages;
 
       if (isPresenceSubed) setUsers();
+
+      if (![...connectedUserList].includes(topic)) setTopic("public");
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     payload,
     isValidPresenceMessage,
     presenceMessages,
     setUsers,
     isPresenceSubed,
+    topic,
+    setTopic,
   ]);
 
   const renderListItem = (item) => {
