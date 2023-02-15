@@ -127,7 +127,12 @@ const HookMqtt = () => {
         setUsername={setUsername}
         connectedUser={username}
       />
-      <Publisher publish={mqttPublish} topic={topic} username={username} />
+      <Publisher
+        publish={mqttPublish}
+        topic={topic}
+        username={username}
+        connectStatus={connectStatus}
+      />
       <Receiver
         payload={payload}
         availabilityCheckInterval={availabilityCheckInterval}

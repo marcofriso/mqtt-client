@@ -40,5 +40,5 @@ If a user has been selected, the button changes to “Send to <username>” othe
     - The text does not get cleared
     - The button cannot be pressed if the text is empty
     - The text will be published to the “John” specific topic (see topics)
-  - [ ] BUG: disable button if text is empty
+  - [x] BUG: disable button if text is empty
 - [ ] A logbook of your actions should be provided with approximate time taken
