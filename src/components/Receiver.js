@@ -1,33 +1,28 @@
 import React, { useEffect, useRef, useCallback } from "react";
 import { Card, List, Row, Col, Button } from "antd";
-import { presenceTopic, privateTopic, publicTopic } from "../utils";
+import {
+  availabilityCheckInterval,
+  isJson,
+  maxMessagesListLength,
+  presenceTopic,
+  privateTopic,
+  publicTopic,
+} from "../utils";
 
 const Receiver = ({
   payload,
-  availabilityCheckInterval,
   isPresenceSubed,
   connected,
   username,
   setTopic,
   topic,
 }) => {
-  let messages = useRef([]);
+  let userMessages = useRef([]);
+  let presenceMessages = useRef([]);
   let connectedUserList = useRef(new Set([]));
   let userList = useRef(new Set(["--all--"]));
-  let presenceMessages = useRef([]);
 
-  const maxMessagesListLength = 1000;
-
-  const isJson = (str) => {
-    try {
-      JSON.parse(str);
-    } catch (e) {
-      return false;
-    }
-    return true;
-  };
-
-  const isValidMessage =
+  const isValidUserMessage =
     payload?.topic !== presenceTopic &&
     isJson(payload.message) &&
     JSON.parse(payload.message).username?.length;
@@ -36,17 +31,6 @@ const Receiver = ({
     payload?.topic === presenceTopic &&
     isJson(payload.message) &&
     JSON.parse(payload.message).username?.length;
-
-  useEffect(() => {
-    if (isValidMessage) {
-      const updatedMessages = [...messages.current, payload];
-
-      if (updatedMessages.length > maxMessagesListLength)
-        updatedMessages.shift();
-
-      messages.current = updatedMessages;
-    }
-  }, [payload, isValidMessage]);
 
   const setUsers = useCallback(() => {
     if (presenceMessages.current.length) {
@@ -60,6 +44,8 @@ const Receiver = ({
         }
       );
 
+      presenceMessages.current = filterRecentMessages;
+
       const connectedUsers = filterRecentMessages
         .filter((message) => message.username !== username)
         .map((message) => message.username);
@@ -71,12 +57,20 @@ const Receiver = ({
       userList.current = new Set(
         [...[...userList.current, ...connectedUsers]].sort()
       );
-
-      presenceMessages.current = filterRecentMessages;
     }
-  }, [availabilityCheckInterval, username]);
+  }, [username]);
 
   useEffect(() => {
+    if (isValidUserMessage) {
+      const updatedMessages = [...userMessages.current, payload];
+
+      if (updatedMessages.length > maxMessagesListLength)
+        updatedMessages.shift();
+
+      userMessages.current = updatedMessages;
+      console.log("MESSAGES PRES", payload);
+    }
+
     if (isValidPresenceMessage) {
       const { username, datetime } = JSON.parse(payload.message);
 
@@ -98,15 +92,16 @@ const Receiver = ({
     }
   }, [
     payload,
+    isValidUserMessage,
     isValidPresenceMessage,
+    isPresenceSubed,
     presenceMessages,
     setUsers,
-    isPresenceSubed,
-    topic,
     setTopic,
+    topic,
   ]);
 
-  const renderListItem = (item) => {
+  const renderMessageListItem = (item) => {
     const { messageText, username, datetime } = JSON.parse(item.message);
 
     const isPrivate = item.topic !== publicTopic;
@@ -116,10 +111,11 @@ const Receiver = ({
     return (
       <List.Item>
         {messageIntro}:{" "}
-        <i
-          style={{ display: isPrivate ? "inline-block" : "none" }}
-          className={"fa fa-lock"}
-        />{" "}
+        {isPrivate && (
+          <span>
+            <i className={"fa fa-lock"} />
+          </span>
+        )}{" "}
         {messageText}
       </List.Item>
     );
@@ -139,7 +135,7 @@ const Receiver = ({
             <span style={{ marginRight: "5px" }}>
               <i className={"fa fa-ban"} />
             </span>
-          )}
+          )}{" "}
           {item}
         </Button>
       </List.Item>
@@ -154,8 +150,8 @@ const Receiver = ({
           <List
             size="small"
             bordered
-            dataSource={messages.current}
-            renderItem={renderListItem}
+            dataSource={userMessages.current}
+            renderItem={renderMessageListItem}
             style={{
               minHeight: "170px",
               maxHeight: "2000px",

@@ -3,10 +3,14 @@ import Connection from "./Connection";
 import Publisher from "./Publisher";
 import Receiver from "./Receiver";
 import mqtt from "mqtt";
-import { presenceTopic, privateTopic, publicTopic } from "../utils";
+import {
+  availabilityCheckInterval,
+  presenceTopic,
+  privateTopic,
+  publicTopic,
+} from "../utils";
 
 export const QosOption = createContext([]);
-const availabilityCheckInterval = 5000;
 
 const HookMqtt = () => {
   const [client, setClient] = useState(null);
@@ -136,7 +140,6 @@ const HookMqtt = () => {
       />
       <Receiver
         payload={payload}
-        availabilityCheckInterval={availabilityCheckInterval}
         isPresenceSubed={isPresenceSubed}
         username={username}
         connected={connectStatus}
