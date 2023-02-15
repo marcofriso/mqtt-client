@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card, Form, Input, Row, Col, Button } from "antd";
+import { publicTopic, privateTopic } from "../utils";
 
 const Publisher = ({ publish, topic, username, connectStatus }) => {
   const [form] = Form.useForm();
@@ -27,7 +28,6 @@ const Publisher = ({ publish, topic, username, connectStatus }) => {
     e.target.value.length && connectStatus === "Connected"
       ? setIsDisabled(false)
       : setIsDisabled(true);
-
     e.preventDefault();
   };
 
@@ -39,7 +39,8 @@ const Publisher = ({ publish, topic, username, connectStatus }) => {
       : setIsDisabled(true);
   }, [connectStatus, form]);
 
-  const displayedTopic = topic === "public" ? "All" : topic;
+  const displayedTopic =
+    topic === publicTopic ? "All" : topic.replace(privateTopic, "");
 
   const PublishForm = (
     <Form
@@ -57,11 +58,7 @@ const Publisher = ({ publish, topic, username, connectStatus }) => {
         </Col>
         <Col span={24} style={{ textAlign: "center" }}>
           <Form.Item>
-            <Button
-              disabled={isDisabled || connectStatus !== "Connected"}
-              type="primary"
-              htmlType="submit"
-            >
+            <Button disabled={isDisabled} type="primary" htmlType="submit">
               Send to {displayedTopic}
             </Button>
           </Form.Item>

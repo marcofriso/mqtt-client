@@ -3,6 +3,7 @@ import Connection from "./Connection";
 import Publisher from "./Publisher";
 import Receiver from "./Receiver";
 import mqtt from "mqtt";
+import { presenceTopic, privateTopic, publicTopic } from "../utils";
 
 export const QosOption = createContext([]);
 const availabilityCheckInterval = 5000;
@@ -13,7 +14,7 @@ const HookMqtt = () => {
   const [payload, setPayload] = useState({});
   const [connectStatus, setConnectStatus] = useState("Disconnected");
   const [username, setUsername] = useState("");
-  const [topic, setTopic] = useState("public");
+  const [topic, setTopic] = useState(publicTopic);
 
   const mqttConnect = (host, mqttOption) => {
     setConnectStatus("Connecting");
@@ -51,7 +52,7 @@ const HookMqtt = () => {
             return;
           }
 
-          if (topic === "presence") setPresenceIsSub(true);
+          if (topic === presenceTopic) setPresenceIsSub(true);
 
           if (!error) {
             console.log(`${username} subscribed to ${topic} successfully`);
@@ -71,7 +72,7 @@ const HookMqtt = () => {
         };
 
         mqttPublish({
-          topic: "presence",
+          topic: presenceTopic,
           payload: JSON.stringify(payload),
         });
       };
@@ -111,9 +112,9 @@ const HookMqtt = () => {
 
   useEffect(() => {
     if (connectStatus === "Connected") {
-      mqttSub({ topic: "presence" });
-      mqttSub({ topic: "public" });
-      mqttSub({ topic: username });
+      mqttSub({ topic: presenceTopic });
+      mqttSub({ topic: publicTopic });
+      mqttSub({ topic: `${privateTopic}${username}` });
     }
     return;
   }, [username, connectStatus, mqttSub]);

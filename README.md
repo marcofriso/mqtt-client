@@ -18,7 +18,7 @@ Use NPM 14.15.1 or similar (MQTT specifies Node 12 or 14 in the documentation)
   - `/topic/chatserver101/public`
   - `/topic/chatserver101/priv/<username>`
     - Applications should publish to this but only one application (with the same username) can subscribe to it.
-  - [ ] BUG: change the topics name
+  - [x] BUG: change the topics name
 - [ ] Allow a simple ‘Connect’ button to connect to the default (see proposed public MQTT service) or customize if necessary. Prerequisite to have the user enter a name (username) for the use of the application.
   - [ ] BUG:  Fix the reconnection with different username
 - [x] A list of participants, and “--all--” on top (preselected) on the right area.

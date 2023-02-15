@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback } from "react";
 import { Card, List, Row, Col, Button } from "antd";
+import { presenceTopic, privateTopic, publicTopic } from "../utils";
 
 const Receiver = ({
   payload,
@@ -27,12 +28,12 @@ const Receiver = ({
   };
 
   const isValidMessage =
-    payload?.topic !== "presence" &&
+    payload?.topic !== presenceTopic &&
     isJson(payload.message) &&
     JSON.parse(payload.message).username?.length;
 
   const isValidPresenceMessage =
-    payload?.topic === "presence" &&
+    payload?.topic === presenceTopic &&
     isJson(payload.message) &&
     JSON.parse(payload.message).username?.length;
 
@@ -44,7 +45,6 @@ const Receiver = ({
         updatedMessages.shift();
 
       messages.current = updatedMessages;
-      console.log("MESSAGES ", messages.current);
     }
   }, [payload, isValidMessage]);
 
@@ -89,7 +89,12 @@ const Receiver = ({
 
       if (isPresenceSubed) setUsers();
 
-      if (![...connectedUserList.current].includes(topic)) setTopic("public");
+      if (
+        ![...connectedUserList.current].includes(
+          topic.replace(privateTopic, "")
+        )
+      )
+        setTopic(publicTopic);
     }
   }, [
     payload,
@@ -104,7 +109,7 @@ const Receiver = ({
   const renderListItem = (item) => {
     const { messageText, username, datetime } = JSON.parse(item.message);
 
-    const isPrivate = item.topic !== "public";
+    const isPrivate = item.topic !== publicTopic;
     const dt = new Date(datetime);
     const messageIntro = `${dt.getHours()}:${dt.getMinutes()} [${username}]`;
 
@@ -124,7 +129,8 @@ const Receiver = ({
     const isDisabled =
       ![...connectedUserList.current].includes(item) ||
       connected !== "Connected";
-    const selectTopic = item === "--all--" ? "public" : item;
+    const selectTopic =
+      item === "--all--" ? publicTopic : `${privateTopic}${item}`;
 
     return (
       <List.Item>
