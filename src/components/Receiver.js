@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { Card, List, Row, Col, Button } from "antd";
 
 const Receiver = ({
@@ -10,11 +10,9 @@ const Receiver = ({
   setTopic,
   topic,
 }) => {
-  const [messages, setMessages] = useState([]);
-  const [connectedUserList, setConnectedUserList] = useState(() => new Set([]));
-
-  let userList = useRef(["--all--"]);
-
+  let messages = useRef([]);
+  let connectedUserList = useRef(new Set([]));
+  let userList = useRef(new Set(["--all--"]));
   let presenceMessages = useRef([]);
 
   const maxMessagesListLength = 1000;
@@ -40,16 +38,14 @@ const Receiver = ({
 
   useEffect(() => {
     if (isValidMessage) {
-      const updatedMessages = [...messages, payload];
+      const updatedMessages = [...messages.current, payload];
 
       if (updatedMessages.length > maxMessagesListLength)
         updatedMessages.shift();
 
-      setMessages(updatedMessages);
-      console.log("MESSAGES ", messages);
+      messages.current = updatedMessages;
+      console.log("MESSAGES ", messages.current);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload, isValidMessage]);
 
   const setUsers = useCallback(() => {
@@ -68,7 +64,9 @@ const Receiver = ({
         .filter((message) => message.username !== username)
         .map((message) => message.username);
 
-      setConnectedUserList(new Set([...connectedUsers, "--all--"].sort()));
+      connectedUserList.current = new Set(
+        [...connectedUsers, "--all--"].sort()
+      );
 
       userList.current = new Set(
         [...[...userList.current, ...connectedUsers]].sort()
@@ -91,10 +89,8 @@ const Receiver = ({
 
       if (isPresenceSubed) setUsers();
 
-      if (![...connectedUserList].includes(topic)) setTopic("public");
+      if (![...connectedUserList.current].includes(topic)) setTopic("public");
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     payload,
     isValidPresenceMessage,
@@ -107,8 +103,8 @@ const Receiver = ({
 
   const renderListItem = (item) => {
     const { messageText, username, datetime } = JSON.parse(item.message);
-    const isPrivate = item.topic !== "public";
 
+    const isPrivate = item.topic !== "public";
     const dt = new Date(datetime);
     const messageIntro = `${dt.getHours()}:${dt.getMinutes()} [${username}]`;
 
@@ -116,7 +112,7 @@ const Receiver = ({
       <List.Item>
         {messageIntro}:{" "}
         <i
-          style={{ visibility: isPrivate ? "visible" : "hidden" }}
+          style={{ display: isPrivate ? "inline-block" : "none" }}
           className={"fa fa-lock"}
         />{" "}
         {messageText}
@@ -125,9 +121,9 @@ const Receiver = ({
   };
 
   const renderUserListItem = (item) => {
-    let isDisabled =
-      ![...connectedUserList].includes(item) || connected !== "Connected";
-
+    const isDisabled =
+      ![...connectedUserList.current].includes(item) ||
+      connected !== "Connected";
     const selectTopic = item === "--all--" ? "public" : item;
 
     return (
@@ -152,7 +148,7 @@ const Receiver = ({
           <List
             size="small"
             bordered
-            dataSource={messages}
+            dataSource={messages.current}
             renderItem={renderListItem}
             style={{
               minHeight: "170px",
