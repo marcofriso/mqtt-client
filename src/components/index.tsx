@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState, useCallback } from "react";
 import Connection from "./Connection";
 import Publisher from "./Publisher";
 import Receiver from "./Receiver";
-import mqtt from "mqtt";
+import mqtt, { IClientOptions, MqttClient } from "mqtt";
 import {
   availabilityCheckInterval,
   presenceTopic,
@@ -13,20 +13,22 @@ import {
 export const QosOption = createContext([]);
 
 const HookMqtt = () => {
-  const [client, setClient] = useState(null);
+  const [client, setClient] = useState<MqttClient | null>(null);
   const [isPresenceSubed, setPresenceIsSub] = useState(false);
-  const [payload, setPayload] = useState({});
+  const [payload, setPayload] = useState({ topic: "", message: "" });
   const [connectStatus, setConnectStatus] = useState("Disconnected");
   const [username, setUsername] = useState("");
   const [topic, setTopic] = useState(publicTopic);
 
-  const mqttConnect = (host, mqttOption) => {
+  const mqttConnect = (host: string, mqttOption: IClientOptions) => {
     setConnectStatus("Connecting");
+
     setClient(mqtt.connect(host, mqttOption));
   };
 
   const mqttDisconnect = () => {
     if (client) {
+      // @ts-ignore
       client.end(() => {
         setConnectStatus("Disconnected");
       });
@@ -34,7 +36,7 @@ const HookMqtt = () => {
   };
 
   const mqttPublish = useCallback(
-    ({ topic, payload }) => {
+    ({ topic, payload }: { topic: string; payload: string | Buffer }) => {
       if (client) {
         client.publish(topic, payload, { qos: 1 }, (error) => {
           if (error) {
@@ -47,9 +49,8 @@ const HookMqtt = () => {
   );
 
   const mqttSub = useCallback(
-    (subscription) => {
+    ({ topic }: { topic: string }) => {
       if (client) {
-        const { topic } = subscription;
         client.subscribe(topic, { qos: 1 }, (error) => {
           if (error) {
             console.log("Subscribe to topics error", error);

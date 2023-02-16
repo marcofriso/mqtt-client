@@ -1,5 +1,5 @@
 import React from "react";
-import HookMqtt from "./components/";
+import HookMqtt from "./components/index";
 import "./App.css";
 
 function App() {

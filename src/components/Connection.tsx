@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, Form, Input, Row, Col } from "antd";
+import { ConnectionProps, ConnectionFormValues } from "../models/connection";
+import { IClientOptions } from "mqtt";
 
 const Connection = ({
   connect,
@@ -7,10 +9,10 @@ const Connection = ({
   connectionStatus,
   setUsername,
   connectedUser,
-}) => {
+}: ConnectionProps) => {
   const [form] = Form.useForm();
   const [detailsDisplayProperty, setDetailsDisplayProperty] = useState("none");
-  const [formFieldsDisabled, setFormFieldsDisabled] = useState("");
+  const [formFieldsDisabled, setFormFieldsDisabled] = useState(true);
 
   const record = {
     host: "broker.emqx.io",
@@ -18,7 +20,7 @@ const Connection = ({
     port: 8083,
   };
 
-  const options = {
+  const options: IClientOptions = {
     keepalive: 30,
     protocolId: "MQTT",
     protocolVersion: 4,
@@ -44,16 +46,16 @@ const Connection = ({
 
   useEffect(() => {
     connectionStatus === "Connected"
-      ? setFormFieldsDisabled("disabled")
-      : setFormFieldsDisabled("");
+      ? setFormFieldsDisabled(true)
+      : setFormFieldsDisabled(false);
   }, [connectionStatus]);
 
-  const onFinish = (values) => {
-    const { host, clientId, port, username, password } = values;
+  const onFinish = (values: ConnectionFormValues) => {
+    const { host, clientId, port, username } = values;
     const url = `ws://${host}:${port}/mqtt`;
+
     options.clientId = clientId;
     options.username = username;
-    options.password = password;
 
     connect(url, options);
     setUsername(username);
@@ -133,7 +135,7 @@ const Connection = ({
           <Col span={6} style={buttonsStyle}>
             <Button
               block
-              type="secondary"
+              type="default"
               onClick={() => {
                 toggleDetailsDisplayProperty();
               }}

@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useCallback } from "react";
 import { Card, List, Row, Col, Button } from "antd";
 import {
+  Payload,
+  PresencePayloadMessage,
+  ReceiverProps,
+} from "../models/receiver";
+import {
   availabilityCheckInterval,
   isJson,
   maxMessagesListLength,
@@ -16,11 +21,11 @@ const Receiver = ({
   username,
   setTopic,
   topic,
-}) => {
-  let userMessages = useRef([]);
-  let presenceMessages = useRef([]);
-  let connectedUserList = useRef(new Set([]));
-  let userList = useRef(new Set(["--all--"]));
+}: ReceiverProps) => {
+  let userMessages = useRef<Payload[]>([]);
+  let presenceMessages = useRef<PresencePayloadMessage[]>([]);
+  let connectedUserList = useRef<Set<string>>(new Set([]));
+  let userList = useRef<Set<string>>(new Set(["--all--"]));
 
   const isValidUserMessage =
     payload?.topic !== presenceTopic &&
@@ -101,7 +106,7 @@ const Receiver = ({
     topic,
   ]);
 
-  const renderMessageListItem = (item) => {
+  const renderMessageListItem = (item: Payload) => {
     const { messageText, username, datetime } = JSON.parse(item.message);
 
     const isPrivate = item.topic !== publicTopic;
@@ -121,7 +126,7 @@ const Receiver = ({
     );
   };
 
-  const renderUserListItem = (item) => {
+  const renderUserListItem = (item: string) => {
     const isDisabled =
       ![...connectedUserList.current].includes(item) ||
       connected !== "Connected";
@@ -164,7 +169,7 @@ const Receiver = ({
           <List
             size="small"
             bordered
-            dataSource={userList.current}
+            dataSource={[...userList.current]}
             renderItem={renderUserListItem}
             style={{
               minHeight: "170px",

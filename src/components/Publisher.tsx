@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Card, Form, Input, Row, Col, Button } from "antd";
 import { publicTopic, privateTopic } from "../utils";
+import { PublisherProps } from "../models/publisher";
 
-const Publisher = ({ publish, topic, username, connectStatus }) => {
+const Publisher = ({
+  publish,
+  topic,
+  username,
+  connectStatus,
+}: PublisherProps) => {
   const [form] = Form.useForm();
   const [isDisabled, setIsDisabled] = useState(true);
 
@@ -10,7 +16,7 @@ const Publisher = ({ publish, topic, username, connectStatus }) => {
     messageText: "",
   };
 
-  const onFinish = ({ messageText }) => {
+  const onFinish = ({ messageText }: { messageText: string }) => {
     const publishedValues = {
       topic,
       payload: JSON.stringify({
@@ -24,7 +30,9 @@ const Publisher = ({ publish, topic, username, connectStatus }) => {
     form.resetFields();
   };
 
-  const onValueChange = (e) => {
+  const onValueChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
     e.target.value.length && connectStatus === "Connected"
       ? setIsDisabled(false)
       : setIsDisabled(true);

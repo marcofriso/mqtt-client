@@ -14,7 +14,7 @@
     "react-scripts": "3.4.3"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts start --typescript",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -34,7 +34,8 @@
       "last 1 safari version"
     ]
   },
-  "overrides": {
+  "devDependencies": {
+    "typescript": "^4.5.5",
     "react-error-overlay": "6.0.9"
   }
 }
