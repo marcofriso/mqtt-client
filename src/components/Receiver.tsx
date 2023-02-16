@@ -41,7 +41,6 @@ const Receiver = ({
 
   const updateUsers = useCallback(() => {
     if (presenceMessages.current.length) {
-      console.log("RUN SET USER");
       const time = new Date().getTime();
 
       const filterRecentMessages = presenceMessages.current.filter(
@@ -63,12 +62,8 @@ const Receiver = ({
       userList.current = new Set(
         [...[...userList.current, ...connectedUsers]].sort()
       );
-
-      if (![...connectedUsers].includes(topic.replace(privateTopic, ""))) {
-        setTopic(publicTopic);
-      }
     }
-  }, [setTopic, topic, username]);
+  }, [username]);
 
   useEffect(() => {
     if (isValidPresenceMessage) {
@@ -87,15 +82,26 @@ const Receiver = ({
 
   useEffect(() => {
     if (isValidUserMessage) {
-      console.log("MESSAGES USER", payload);
-
       const updatedMessages = [...userMessages, payload];
       if (updatedMessages.length > maxMessageListLength)
         updatedMessages.shift();
 
       setUserMessages(updatedMessages as never);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isValidUserMessage, payload]);
+
+  useEffect(() => {
+    if (![...connectedUserList].includes(topic.replace(privateTopic, ""))) {
+      setTopic(publicTopic);
+    }
+  }, [connectedUserList, setTopic, topic]);
+
+  useEffect(() => {
+    if (connected !== "Connected") {
+      setConnectedUserList(new Set([]));
+    }
+  }, [connected]);
 
   const renderMessageListItem = (item: Payload) => {
     const { messageText, username, datetime } = JSON.parse(item.message);
@@ -137,6 +143,7 @@ const Receiver = ({
     );
   };
 
+  console.log("CONNECTED", connectedUserList);
   return (
     <Card title="Receiver">
       <Row gutter={20}>

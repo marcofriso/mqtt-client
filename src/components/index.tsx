@@ -32,6 +32,7 @@ const HookMqtt = () => {
       client.end(() => {
         setConnectStatus("Disconnected");
       });
+      setPresenceIsSub(false);
       setClient(null);
     }
   };
@@ -39,7 +40,7 @@ const HookMqtt = () => {
   const mqttPublish = useCallback(
     ({ topic, payload }: { topic: string; payload: string | Buffer }) => {
       if (client) {
-        console.log("PUBLISH");
+        // console.log("PUBLISH");
         client.publish(topic, payload, { qos: 1 }, (error) => {
           if (error) {
             console.log("Publish error: ", error);
@@ -57,11 +58,8 @@ const HookMqtt = () => {
           if (error) {
             console.log("Subscribe to topics error", error);
             return;
-          }
-
-          if (topic === presenceTopic) setPresenceIsSub(true);
-
-          if (!error) {
+          } else {
+            if (topic === presenceTopic) setPresenceIsSub(true);
             console.log(`${username} subscribed to ${topic} successfully`);
           }
         });
@@ -101,6 +99,7 @@ const HookMqtt = () => {
   useEffect(() => {
     if (isPresenceSubed) {
       const keepUserAvailablePublisher = () => {
+        console.log("RUNS-KEEP");
         const payload = {
           datetime: new Date(),
           username,
