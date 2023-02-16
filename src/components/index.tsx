@@ -32,12 +32,14 @@ const HookMqtt = () => {
       client.end(() => {
         setConnectStatus("Disconnected");
       });
+      setClient(null);
     }
   };
 
   const mqttPublish = useCallback(
     ({ topic, payload }: { topic: string; payload: string | Buffer }) => {
       if (client) {
+        console.log("PUBLISH");
         client.publish(topic, payload, { qos: 1 }, (error) => {
           if (error) {
             console.log("Publish error: ", error);
@@ -69,33 +71,6 @@ const HookMqtt = () => {
   );
 
   useEffect(() => {
-    if (connectStatus === "Connected") {
-      const keepUserAvailablePublisher = () => {
-        const payload = {
-          datetime: new Date(),
-          username,
-        };
-
-        mqttPublish({
-          topic: presenceTopic,
-          payload: JSON.stringify(payload),
-        });
-      };
-
-      keepUserAvailablePublisher();
-
-      const kUAPInterval = setInterval(
-        () => keepUserAvailablePublisher(),
-        availabilityCheckInterval
-      );
-
-      return () => {
-        clearInterval(kUAPInterval);
-      };
-    }
-  }, [mqttPublish, username, connectStatus]);
-
-  useEffect(() => {
     if (client) {
       client.on("connect", () => {
         setConnectStatus("Connected");
@@ -121,8 +96,34 @@ const HookMqtt = () => {
       mqttSub({ topic: publicTopic });
       mqttSub({ topic: `${privateTopic}${username}` });
     }
-    return;
   }, [username, connectStatus, mqttSub]);
+
+  useEffect(() => {
+    if (isPresenceSubed) {
+      const keepUserAvailablePublisher = () => {
+        const payload = {
+          datetime: new Date(),
+          username,
+        };
+
+        mqttPublish({
+          topic: presenceTopic,
+          payload: JSON.stringify(payload),
+        });
+      };
+
+      keepUserAvailablePublisher();
+
+      const kUAPInterval = setInterval(
+        () => keepUserAvailablePublisher(),
+        availabilityCheckInterval
+      );
+
+      return () => {
+        clearInterval(kUAPInterval);
+      };
+    }
+  }, [mqttPublish, username, isPresenceSubed]);
 
   return (
     <>

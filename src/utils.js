@@ -3,7 +3,7 @@ const privateTopic = "/topic/chatserver101/priv/";
 const publicTopic = "/topic/chatserver101/public";
 
 const availabilityCheckInterval = 5000;
-const maxMessagesListLength = 1000;
+const maxMessageListLength = 1000;
 
 const isJson = (str) => {
   try {
@@ -17,7 +17,7 @@ const isJson = (str) => {
 export {
   availabilityCheckInterval,
   isJson,
-  maxMessagesListLength,
+  maxMessageListLength,
   presenceTopic,
   privateTopic,
   publicTopic,

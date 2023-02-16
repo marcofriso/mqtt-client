@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { Card, List, Row, Col, Button } from "antd";
 import {
   Payload,
@@ -8,7 +8,7 @@ import {
 import {
   availabilityCheckInterval,
   isJson,
-  maxMessagesListLength,
+  maxMessageListLength,
   presenceTopic,
   privateTopic,
   publicTopic,
@@ -22,10 +22,12 @@ const Receiver = ({
   setTopic,
   topic,
 }: ReceiverProps) => {
-  let userMessages = useRef<Payload[]>([]);
   let presenceMessages = useRef<PresencePayloadMessage[]>([]);
-  let connectedUserList = useRef<Set<string>>(new Set([]));
   let userList = useRef<Set<string>>(new Set(["--all--"]));
+  const [userMessages, setUserMessages] = useState([]);
+  const [connectedUserList, setConnectedUserList] = useState<Set<string>>(
+    new Set([])
+  );
 
   const isValidUserMessage =
     payload?.topic !== presenceTopic &&
@@ -37,8 +39,9 @@ const Receiver = ({
     isJson(payload.message) &&
     JSON.parse(payload.message).username?.length;
 
-  const setUsers = useCallback(() => {
+  const updateUsers = useCallback(() => {
     if (presenceMessages.current.length) {
+      console.log("RUN SET USER");
       const time = new Date().getTime();
 
       const filterRecentMessages = presenceMessages.current.filter(
@@ -55,56 +58,44 @@ const Receiver = ({
         .filter((message) => message.username !== username)
         .map((message) => message.username);
 
-      connectedUserList.current = new Set(
-        [...connectedUsers, "--all--"].sort()
-      );
+      setConnectedUserList(new Set([...connectedUsers, "--all--"].sort()));
 
       userList.current = new Set(
         [...[...userList.current, ...connectedUsers]].sort()
       );
+
+      if (![...connectedUsers].includes(topic.replace(privateTopic, ""))) {
+        setTopic(publicTopic);
+      }
     }
-  }, [username]);
+  }, [setTopic, topic, username]);
 
   useEffect(() => {
-    if (isValidUserMessage) {
-      const updatedMessages = [...userMessages.current, payload];
-
-      if (updatedMessages.length > maxMessagesListLength)
-        updatedMessages.shift();
-
-      userMessages.current = updatedMessages;
-      console.log("MESSAGES PRES", payload);
-    }
-
     if (isValidPresenceMessage) {
+      console.log("MESSAGES PRESENCE", payload.message);
       const { username, datetime } = JSON.parse(payload.message);
 
       const updatedMessages = [
         ...presenceMessages.current,
         { username, datetime },
       ];
-
       presenceMessages.current = updatedMessages;
 
-      if (isPresenceSubed) setUsers();
-
-      if (
-        ![...connectedUserList.current].includes(
-          topic.replace(privateTopic, "")
-        )
-      )
-        setTopic(publicTopic);
+      if (isPresenceSubed) updateUsers();
     }
-  }, [
-    payload,
-    isValidUserMessage,
-    isValidPresenceMessage,
-    isPresenceSubed,
-    presenceMessages,
-    setUsers,
-    setTopic,
-    topic,
-  ]);
+  }, [isPresenceSubed, isValidPresenceMessage, payload.message, updateUsers]);
+
+  useEffect(() => {
+    if (isValidUserMessage) {
+      console.log("MESSAGES USER", payload);
+
+      const updatedMessages = [...userMessages, payload];
+      if (updatedMessages.length > maxMessageListLength)
+        updatedMessages.shift();
+
+      setUserMessages(updatedMessages as never);
+    }
+  }, [isValidUserMessage, payload]);
 
   const renderMessageListItem = (item: Payload) => {
     const { messageText, username, datetime } = JSON.parse(item.message);
@@ -128,8 +119,7 @@ const Receiver = ({
 
   const renderUserListItem = (item: string) => {
     const isDisabled =
-      ![...connectedUserList.current].includes(item) ||
-      connected !== "Connected";
+      ![...connectedUserList].includes(item) || connected !== "Connected";
     const selectTopic =
       item === "--all--" ? publicTopic : `${privateTopic}${item}`;
 
@@ -155,7 +145,7 @@ const Receiver = ({
           <List
             size="small"
             bordered
-            dataSource={userMessages.current}
+            dataSource={userMessages}
             renderItem={renderMessageListItem}
             style={{
               minHeight: "170px",
