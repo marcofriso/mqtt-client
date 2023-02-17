@@ -28,6 +28,7 @@ const Publisher = ({
 
     publish(publishedValues);
     form.resetFields();
+    setIsDisabled(true);
   };
 
   const onValueChange = (
