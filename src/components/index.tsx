@@ -79,6 +79,8 @@ const HookMqtt = () => {
       });
       client.on("reconnect", () => {
         setConnectStatus("Reconnecting");
+        // client reconnect does not appear to be working properly
+        client.end();
       });
       client.on("message", (topic, message) => {
         const payload = { topic, message: message.toString() };
