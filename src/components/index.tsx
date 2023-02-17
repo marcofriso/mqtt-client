@@ -40,7 +40,6 @@ const HookMqtt = () => {
   const mqttPublish = useCallback(
     ({ topic, payload }: { topic: string; payload: string | Buffer }) => {
       if (client) {
-        // console.log("PUBLISH");
         client.publish(topic, payload, { qos: 1 }, (error) => {
           if (error) {
             console.log("Publish error: ", error);
@@ -101,7 +100,6 @@ const HookMqtt = () => {
   useEffect(() => {
     if (isPresenceSubed) {
       const keepUserAvailablePublisher = () => {
-        console.log("RUNS-KEEP");
         const payload = {
           datetime: new Date(),
           username,

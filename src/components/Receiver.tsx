@@ -67,7 +67,6 @@ const Receiver = ({
 
   useEffect(() => {
     if (isValidPresenceMessage) {
-      console.log("MESSAGES PRESENCE", payload.message);
       const { username, datetime } = JSON.parse(payload.message);
 
       const updatedMessages = [
@@ -96,12 +95,6 @@ const Receiver = ({
       setTopic(publicTopic);
     }
   }, [connectedUserList, setTopic, topic]);
-
-  useEffect(() => {
-    if (connected !== "Connected") {
-      setConnectedUserList(new Set([]));
-    }
-  }, [connected]);
 
   const renderMessageListItem = (item: Payload) => {
     const { messageText, username, datetime } = JSON.parse(item.message);
@@ -143,7 +136,6 @@ const Receiver = ({
     );
   };
 
-  console.log("CONNECTED", connectedUserList);
   return (
     <Card title="Receiver">
       <Row gutter={20}>
