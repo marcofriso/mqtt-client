@@ -13,6 +13,7 @@ const Connection = ({
   const [form] = Form.useForm();
   const [detailsDisplayProperty, setDetailsDisplayProperty] = useState("none");
   const [formFieldsDisabled, setFormFieldsDisabled] = useState(true);
+  const [submitButtonDisabled, setSubmitButtondDisabled] = useState(false);
 
   const record = {
     host: "broker.emqx.io",
@@ -61,11 +62,18 @@ const Connection = ({
     setUsername(username);
   };
 
+  const temporaryDisableSubmitButton = () => {
+    setSubmitButtondDisabled(true);
+    setTimeout(() => setSubmitButtondDisabled(false), 2000);
+  };
+
   const handleConnect = () => {
+    temporaryDisableSubmitButton();
     form.submit();
   };
 
   const handleDisconnect = () => {
+    temporaryDisableSubmitButton();
     disconnect();
   };
 
@@ -123,11 +131,21 @@ const Connection = ({
           </Col>
           <Col span={6} style={buttonsStyle}>
             {connectionStatus === "Connected" ? (
-              <Button block danger onClick={handleDisconnect}>
+              <Button
+                block
+                danger
+                onClick={handleDisconnect}
+                disabled={submitButtonDisabled}
+              >
                 Disconnect
               </Button>
             ) : (
-              <Button block type="primary" onClick={handleConnect}>
+              <Button
+                block
+                type="primary"
+                onClick={handleConnect}
+                disabled={submitButtonDisabled}
+              >
                 Connect
               </Button>
             )}
