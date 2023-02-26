@@ -49,6 +49,10 @@ const Connection = ({
     connectionStatus === "Connected"
       ? setFormFieldsDisabled(true)
       : setFormFieldsDisabled(false);
+
+    connectionStatus === "Connected" || connectionStatus === "Disconnected"
+      ? setSubmitButtondDisabled(false)
+      : setSubmitButtondDisabled(true);
   }, [connectionStatus]);
 
   const onFinish = (values: ConnectionFormValues) => {
@@ -62,18 +66,11 @@ const Connection = ({
     setUsername(username);
   };
 
-  const temporaryDisableSubmitButton = () => {
-    setSubmitButtondDisabled(true);
-    setTimeout(() => setSubmitButtondDisabled(false), 2000);
-  };
-
   const handleConnect = () => {
-    temporaryDisableSubmitButton();
     form.submit();
   };
 
   const handleDisconnect = () => {
-    temporaryDisableSubmitButton();
     disconnect();
   };
 
